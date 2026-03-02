@@ -6,6 +6,293 @@ info:
 servers:
   - url: /api/v1
 paths:
+  /auth/register:
+    post:
+      summary: Créer compte entreprise + gérant
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Compte créé
+
+  /auth/login:
+    post:
+      summary: Connexion
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Connexion réussie
+
+  /auth/refresh:
+    post:
+      summary: Renouveler access token
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token renouvelé
+
+  /auth/logout:
+    post:
+      summary: Déconnexion
+      tags: [Auth]
+      responses:
+        '204':
+          description: Déconnecté
+
+  /auth/me:
+    get:
+      summary: Profil utilisateur courant
+      tags: [Auth]
+      responses:
+        '200':
+          description: Profil utilisateur
+
+  /utilisateurs:
+    get:
+      summary: Liste des utilisateurs
+      tags: [Utilisateurs]
+      responses:
+        '200':
+          description: Liste des utilisateurs
+    post:
+      summary: Créer un utilisateur
+      tags: [Utilisateurs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUtilisateurRequest'
+      responses:
+        '201':
+          description: Utilisateur créé
+
+  /utilisateurs/{id}:
+    put:
+      summary: Mettre à jour un utilisateur
+      tags: [Utilisateurs]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUtilisateurRequest'
+      responses:
+        '200':
+          description: Utilisateur mis à jour
+    delete:
+      summary: Désactiver/Supprimer un utilisateur
+      tags: [Utilisateurs]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Utilisateur supprimé
+
+  /utilisateurs/mot-de-passe:
+    patch:
+      summary: Changer son mot de passe
+      tags: [Utilisateurs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Mot de passe mis à jour
+
+  /produits:
+    get:
+      summary: Liste des produits
+      tags: [Produits]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: categorieId
+          schema: { type: string, format: uuid }
+        - in: query
+          name: stockBas
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Liste des produits
+    post:
+      summary: Créer un produit
+      tags: [Produits]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProduitRequest'
+      responses:
+        '201':
+          description: Produit créé
+
+  /produits/alertes:
+    get:
+      summary: Liste des produits en alerte de stock
+      tags: [Produits]
+      responses:
+        '200':
+          description: Produits en alerte
+
+  /produits/{id}:
+    get:
+      summary: Détail d'un produit
+      tags: [Produits]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Produit
+    put:
+      summary: Mettre à jour un produit
+      tags: [Produits]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProduitRequest'
+      responses:
+        '200':
+          description: Produit mis à jour
+    delete:
+      summary: Supprimer un produit
+      tags: [Produits]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Produit supprimé
+
+  /produits/{id}/stock:
+    post:
+      summary: Ajuster le stock d'un produit
+      tags: [Produits]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AjusterStockRequest'
+      responses:
+        '200':
+          description: Stock ajusté
+
+  /fournisseurs:
+    get:
+      summary: Liste des fournisseurs
+      tags: [Fournisseurs]
+      responses:
+        '200':
+          description: Liste des fournisseurs
+    post:
+      summary: Créer un fournisseur
+      tags: [Fournisseurs]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFournisseurRequest'
+      responses:
+        '201':
+          description: Fournisseur créé
+
+  /fournisseurs/{id}:
+    get:
+      summary: Détail fournisseur
+      tags: [Fournisseurs]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Fournisseur
+    put:
+      summary: Mettre à jour fournisseur
+      tags: [Fournisseurs]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFournisseurRequest'
+      responses:
+        '200':
+          description: Fournisseur mis à jour
+    delete:
+      summary: Supprimer fournisseur
+      tags: [Fournisseurs]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Fournisseur supprimé
+
   /clients:
     get:
       summary: Liste des clients
@@ -220,6 +507,34 @@ paths:
         '200':
           description: Top produits
 
+  /comptabilite/grand-livre:
+    get:
+      summary: Grand livre
+      tags: [Comptabilite]
+      responses:
+        '200':
+          description: Grand livre comptable
+
+  /comptabilite/balance:
+    get:
+      summary: Balance des comptes
+      tags: [Comptabilite]
+      responses:
+        '200':
+          description: Balance comptable
+
+  /comptabilite/compte-resultat:
+    get:
+      summary: Compte de résultat
+      tags: [Comptabilite]
+      parameters:
+        - in: query
+          name: exercice
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Compte de résultat
+
   /categories:
     get:
       summary: Liste des catégories
@@ -321,8 +636,199 @@ paths:
         '200':
           description: Message reçu
 
+  /pdf/factures/{id}:
+    get:
+      summary: Télécharger la facture en PDF
+      tags: [PDF]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: PDF de la facture
+
+  /mobile-money/wave/initier:
+    post:
+      summary: Initier un paiement Wave
+      tags: [MobileMoney]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitWaveRequest'
+      responses:
+        '200':
+          description: Session Wave créée
+
+  /mobile-money/orange/initier:
+    post:
+      summary: Initier un paiement Orange Money
+      tags: [MobileMoney]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitOrangeRequest'
+      responses:
+        '200':
+          description: Paiement Orange initialisé
+
+  /notif/facture/{id}/envoyer-sms:
+    post:
+      summary: Envoyer une facture par SMS
+      tags: [Notifications]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: SMS envoyé
+
+  /notif/facture/{id}/envoyer-whatsapp:
+    post:
+      summary: Envoyer une facture par WhatsApp
+      tags: [Notifications]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: WhatsApp envoyé
+
 components:
   schemas:
+    RegisterRequest:
+      type: object
+      required: [nomEntreprise, prenom, nom, email, motDePasse]
+      properties:
+        nomEntreprise: { type: string }
+        prenom: { type: string }
+        nom: { type: string }
+        email: { type: string, format: email }
+        motDePasse: { type: string, minLength: 8 }
+        telephone: { type: string }
+
+    LoginRequest:
+      type: object
+      required: [email, motDePasse, entrepriseId]
+      properties:
+        email: { type: string, format: email }
+        motDePasse: { type: string }
+        entrepriseId: { type: string, format: uuid }
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+
+    CreateUtilisateurRequest:
+      type: object
+      required: [prenom, nom, email, motDePasse, role]
+      properties:
+        prenom: { type: string }
+        nom: { type: string }
+        email: { type: string, format: email }
+        motDePasse: { type: string }
+        telephone: { type: string }
+        role:
+          type: string
+          enum: [GERANT, COMPTABLE, CAISSIER, EMPLOYE]
+
+    UpdateUtilisateurRequest:
+      type: object
+      properties:
+        prenom: { type: string }
+        nom: { type: string }
+        email: { type: string, format: email }
+        telephone: { type: string }
+        role:
+          type: string
+          enum: [GERANT, COMPTABLE, CAISSIER, EMPLOYE]
+
+    ChangePasswordRequest:
+      type: object
+      required: [ancienMotDePasse, nouveauMotDePasse]
+      properties:
+        ancienMotDePasse: { type: string }
+        nouveauMotDePasse: { type: string }
+
+    CreateProduitRequest:
+      type: object
+      required: [nom, prixVente]
+      properties:
+        categorieId: { type: string, format: uuid }
+        reference: { type: string }
+        codeBarres: { type: string }
+        nom: { type: string }
+        description: { type: string }
+        prixVente: { type: number }
+        prixAchat: { type: number }
+        tva: { type: number }
+        unite: { type: string }
+        stockActuel: { type: number }
+        stockMinimum: { type: number }
+        stockMaximum: { type: number }
+
+    UpdateProduitRequest:
+      type: object
+      properties:
+        categorieId: { type: string, format: uuid }
+        reference: { type: string }
+        codeBarres: { type: string }
+        nom: { type: string }
+        description: { type: string }
+        prixVente: { type: number }
+        prixAchat: { type: number }
+        tva: { type: number }
+        unite: { type: string }
+        stockMinimum: { type: number }
+        stockMaximum: { type: number }
+        actif: { type: boolean }
+
+    AjusterStockRequest:
+      type: object
+      required: [type, quantite]
+      properties:
+        type:
+          type: string
+          enum: [ENTREE, SORTIE, AJUSTEMENT, RETOUR]
+        quantite: { type: number }
+        motif: { type: string }
+        reference: { type: string }
+
+    CreateFournisseurRequest:
+      type: object
+      required: [nom]
+      properties:
+        nom: { type: string }
+        telephone: { type: string }
+        email: { type: string, format: email }
+        adresse: { type: string }
+        ville: { type: string }
+        ninea: { type: string }
+        notes: { type: string }
+
+    UpdateFournisseurRequest:
+      type: object
+      properties:
+        nom: { type: string }
+        telephone: { type: string }
+        email: { type: string, format: email }
+        adresse: { type: string }
+        ville: { type: string }
+        ninea: { type: string }
+        notes: { type: string }
+        actif: { type: boolean }
+
     CreateClientRequest:
       type: object
       required: [nom]
@@ -414,3 +920,19 @@ components:
       properties:
         nom: { type: string }
         description: { type: string }
+
+    InitWaveRequest:
+      type: object
+      required: [factureId, montant, telephone]
+      properties:
+        factureId: { type: string, format: uuid }
+        montant: { type: number }
+        telephone: { type: string }
+
+    InitOrangeRequest:
+      type: object
+      required: [factureId, montant, telephone]
+      properties:
+        factureId: { type: string, format: uuid }
+        montant: { type: number }
+        telephone: { type: string }

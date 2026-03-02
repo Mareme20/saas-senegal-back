@@ -44,6 +44,10 @@ npm run db:seed
 
 # 6. Démarrer
 npm run dev   # http://localhost:4000
+
+# 7. Documentation API
+# Swagger UI: http://localhost:4000/api/v1/docs
+# OpenAPI YAML: http://localhost:4000/api/v1/docs/openapi.yaml
 ```
 
 ---
@@ -61,6 +65,19 @@ Le backend est organisé avec séparation claire des responsabilités :
 Documentation API:
 - `docs/API_DOCUMENTATION.md` (vue rapide)
 - `docs/openapi.yaml` (spec OpenAPI 3.0)
+- Swagger UI: `http://localhost:4000/api/v1/docs`
+- OpenAPI servi par l'app: `http://localhost:4000/api/v1/docs/openapi.yaml`
+
+---
+
+## 📚 Swagger / OpenAPI
+
+- Interface Swagger: `GET /api/v1/docs`
+- Fichier OpenAPI: `GET /api/v1/docs/openapi.yaml`
+
+Notes:
+- Si l'interface Swagger ne se charge pas (CDN/réseau), `/api/v1/docs` affiche automatiquement un fallback avec la spec OpenAPI brute.
+- La spec couvre les modules: Auth, Entreprise, Utilisateurs, Produits, Catégories, Clients, Fournisseurs, Factures, Paiements, Mobile Money, Dashboard, Comptabilité, Notifications, Upload, PDF, Webhooks.
 
 ---
 
@@ -219,60 +236,45 @@ socket.on('dashboard_update', () => console.log('Dashboard à rafraîchir'));
 ## 📁 Structure du projet
 
 ```
+docs/
+├── API_DOCUMENTATION.md        # Vue fonctionnelle
+└── openapi.yaml                # Spec OpenAPI (Swagger)
+
 src/
 ├── index.ts                    # Bootstrap (HTTP + WS + Cron)
-├── app.ts                      # Express + toutes les routes
+├── app.ts                      # Express + middlewares + routes + docs
 ├── config/
 │   ├── database.ts             # TypeORM DataSource
+│   ├── logger.ts               # Pino logger
 │   ├── redis.ts                # Redis client
-│   └── logger.ts               # Pino logger
-├── entities/                   # Entités TypeORM (11 modèles)
-│   ├── Entreprise.ts
-│   ├── Utilisateur.ts
-│   ├── Categorie.ts
-│   ├── Produit.ts
-│   ├── MouvementStock.ts
-│   ├── Client.ts
-│   ├── Facture.ts
-│   ├── LigneFacture.ts
-│   ├── Paiement.ts
-│   ├── Fournisseur.ts
-│   └── EcritureComptable.ts    # SYSCOHADA
+│   └── swagger.ts              # HTML Swagger UI + fallback
+├── controllers/                # Couche HTTP
+├── dtos/                       # Schémas de validation (Zod)
+├── entities/                   # Entités TypeORM
 ├── middlewares/
-│   ├── auth.middleware.ts      # JWT + multi-tenant
-│   └── errorHandler.ts        # Erreurs TypeORM + Zod
-├── services/
-│   ├── auth.service.ts
-│   ├── produit.service.ts
-│   ├── facture.service.ts
-│   ├── dashboard.service.ts
-│   ├── utilisateur.service.ts
-│   ├── fournisseur.service.ts
-│   ├── comptabilite.service.ts # SYSCOHADA
-│   ├── pdf/
-│   │   └── facture.pdf.ts      # PDF avec PDFKit
-│   ├── payments/
-│   │   ├── wave.service.ts     # Wave Pay API
-│   │   └── orange-money.service.ts
-│   └── notifications/
-│       ├── sms.service.ts      # Africa's Talking
-│       ├── whatsapp.service.ts # WhatsApp Business
-│       └── email.service.ts    # Nodemailer
-├── routes/
-│   ├── auth.routes.ts
-│   ├── produit.routes.ts
-│   ├── _all.routes.ts          # facture, client, stock, dashboard...
-│   └── extended.routes.ts     # utilisateurs, compta, pdf, webhooks...
-├── websocket/
-│   └── socket.ts               # Socket.io + events
+│   ├── auth.middleware.ts      # JWT + rôles + tenant
+│   └── errorHandler.ts         # Gestion d'erreurs globale
+├── repositories/
+│   ├── interfaces/             # Contrats repository
+│   └── implementations/        # Implémentations TypeORM
+├── services/                   # Logique métier
+│   ├── notifications/          # SMS, WhatsApp, Email
+│   ├── payments/               # Wave, Orange Money
+│   └── pdf/                    # Génération PDF
+├── routes/                     # Définition endpoints API
 ├── jobs/
-│   └── cron.ts                 # Rappels, alertes, rapports auto
+│   └── cron.ts                 # Tâches planifiées
+├── websocket/
+│   └── socket.ts               # Événements temps réel
+├── utils/
+│   ├── ApiError.ts
+│   └── ApiResponse.ts
 ├── database/
-│   ├── seed.ts
-│   └── migrations/
+│   └── seed.ts
 └── __tests__/
     ├── auth.test.ts
-    └── facture.test.ts
+    ├── facture.service.test.ts
+    └── webhook.controller.test.ts
 ```
 
 ---

@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 
 import { logger } from './config/logger';
+import { getSwaggerHtml } from './config/swagger';
 import { ApiError } from './utils/ApiError';
 import { errorHandler } from './middlewares/errorHandler';
 
@@ -30,7 +31,11 @@ const app: Application = express();
 const API = `/api/${process.env.API_VERSION || 'v1'}`;
 
 // ── Sécurité ─────────────────────────────────────────────────
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  // Swagger UI injects inline/external assets; strict CSP blocks the docs page.
+  contentSecurityPolicy: false,
+}));
 app.use(cors({
   origin: (origin, callback) => {
     const allowed = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
@@ -65,6 +70,12 @@ app.use(cookieParser());
 
 // ── Fichiers statiques (uploads) ─────────────────────────────
 app.use('/uploads', express.static(path.join(process.cwd(), process.env.UPLOAD_DIR || './uploads')));
+
+// ── Swagger/OpenAPI ──────────────────────────────────────────
+app.get(`${API}/docs`, (_req: Request, res: Response) => {
+  res.type('html').send(getSwaggerHtml(`${API}/docs/openapi.yaml`));
+});
+app.use(`${API}/docs`, express.static(path.join(process.cwd(), 'docs')));
 
 // ── Logging HTTP ─────────────────────────────────────────────
 if (process.env.NODE_ENV !== 'test') {
