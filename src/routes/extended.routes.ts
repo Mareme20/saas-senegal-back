@@ -1,0 +1,9 @@
+export { utilisateurRoutes } from './utilisateur.routes';
+export { categorieRoutes } from './categorie.routes';
+export { fournisseurRoutes } from './fournisseur.routes';
+export { comptaRoutes } from './comptabilite.routes';
+export { pdfRoutes } from './pdf.routes';
+export { mobileMoneyRoutes } from './mobile-money.routes';
+export { webhookRoutes } from './webhook.routes';
+export { uploadRoutes } from './upload.routes';
+export { notifRoutes } from './notification.routes';

@@ -1,0 +1,416 @@
+openapi: 3.0.3
+info:
+  title: SaaS Senegal API
+  version: 1.0.0
+  description: API backend SaaS Senegal (Express + TypeScript + TypeORM)
+servers:
+  - url: /api/v1
+paths:
+  /clients:
+    get:
+      summary: Liste des clients
+      tags: [Clients]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: Liste paginée des clients
+    post:
+      summary: Créer un client
+      tags: [Clients]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientRequest'
+      responses:
+        '201':
+          description: Client créé
+  /clients/{id}:
+    get:
+      summary: Détail client
+      tags: [Clients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Client
+    put:
+      summary: Mettre à jour un client
+      tags: [Clients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClientRequest'
+      responses:
+        '200':
+          description: Client mis à jour
+
+  /factures:
+    get:
+      summary: Liste des factures
+      tags: [Factures]
+      responses:
+        '200':
+          description: Liste factures
+    post:
+      summary: Créer une facture
+      tags: [Factures]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFactureRequest'
+      responses:
+        '201':
+          description: Facture créée
+
+  /factures/{id}:
+    get:
+      summary: Détail facture
+      tags: [Factures]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Facture
+
+  /factures/{id}/statut:
+    patch:
+      summary: Changer le statut d'une facture
+      tags: [Factures]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [statut]
+              properties:
+                statut:
+                  type: string
+                  enum: [BROUILLON, ENVOYEE, PARTIELLEMENT_PAYEE, PAYEE, EN_RETARD, ANNULEE]
+      responses:
+        '200':
+          description: Statut mis à jour
+
+  /paiements:
+    get:
+      summary: Liste des paiements
+      tags: [Paiements]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Liste paiements
+    post:
+      summary: Créer un paiement
+      tags: [Paiements]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaiementRequest'
+      responses:
+        '201':
+          description: Paiement enregistré
+
+  /entreprise/public/liste:
+    get:
+      summary: Liste publique des entreprises
+      tags: [Entreprise]
+      responses:
+        '200':
+          description: Liste des entreprises
+
+  /entreprise:
+    get:
+      summary: Entreprise courante
+      tags: [Entreprise]
+      responses:
+        '200':
+          description: Entreprise
+    put:
+      summary: Mettre à jour l'entreprise courante
+      tags: [Entreprise]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEntrepriseRequest'
+      responses:
+        '200':
+          description: Entreprise mise à jour
+
+  /stock/mouvements:
+    get:
+      summary: Liste des mouvements de stock
+      tags: [Stock]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Mouvements de stock
+
+  /dashboard/kpis:
+    get:
+      summary: KPIs dashboard
+      tags: [Dashboard]
+      responses:
+        '200':
+          description: KPIs
+
+  /dashboard/ventes:
+    get:
+      summary: Ventes par jour
+      tags: [Dashboard]
+      parameters:
+        - in: query
+          name: jours
+          schema: { type: integer, default: 30 }
+      responses:
+        '200':
+          description: Série ventes
+
+  /dashboard/top-produits:
+    get:
+      summary: Top produits
+      tags: [Dashboard]
+      responses:
+        '200':
+          description: Top produits
+
+  /categories:
+    get:
+      summary: Liste des catégories
+      tags: [Categories]
+      responses:
+        '200':
+          description: Liste des catégories
+    post:
+      summary: Créer une catégorie
+      tags: [Categories]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategorieRequest'
+      responses:
+        '201':
+          description: Catégorie créée
+
+  /categories/{id}:
+    put:
+      summary: Mettre à jour une catégorie
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategorieRequest'
+      responses:
+        '200':
+          description: Catégorie mise à jour
+    delete:
+      summary: Supprimer une catégorie
+      tags: [Categories]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Catégorie supprimée
+
+  /upload/logo:
+    post:
+      summary: Upload logo entreprise
+      tags: [Upload]
+      responses:
+        '200':
+          description: Logo mis à jour
+
+  /upload/produit/{id}/image:
+    post:
+      summary: Upload image produit
+      tags: [Upload]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Image mise à jour
+
+  /webhooks/wave:
+    post:
+      summary: Webhook Wave
+      tags: [Webhooks]
+      responses:
+        '200':
+          description: Webhook reçu
+
+  /webhooks/orange:
+    post:
+      summary: Webhook Orange Money
+      tags: [Webhooks]
+      responses:
+        '200':
+          description: Webhook reçu
+
+  /webhooks/whatsapp:
+    get:
+      summary: Vérification webhook WhatsApp
+      tags: [Webhooks]
+      responses:
+        '200':
+          description: Challenge validé
+    post:
+      summary: Réception messages WhatsApp
+      tags: [Webhooks]
+      responses:
+        '200':
+          description: Message reçu
+
+components:
+  schemas:
+    CreateClientRequest:
+      type: object
+      required: [nom]
+      properties:
+        nom: { type: string }
+        prenom: { type: string }
+        telephone: { type: string }
+        email: { type: string, format: email }
+        adresse: { type: string }
+        quartier: { type: string }
+        ville: { type: string }
+        type:
+          type: string
+          enum: [PARTICULIER, ENTREPRISE, ADMINISTRATION]
+        notes: { type: string }
+
+    UpdateClientRequest:
+      type: object
+      properties:
+        nom: { type: string }
+        prenom: { type: string }
+        telephone: { type: string }
+        email: { type: string, format: email }
+        adresse: { type: string }
+        quartier: { type: string }
+        ville: { type: string }
+        type:
+          type: string
+          enum: [PARTICULIER, ENTREPRISE, ADMINISTRATION]
+        notes: { type: string }
+
+    CreatePaiementRequest:
+      type: object
+      required: [montant, methode]
+      properties:
+        factureId: { type: string, format: uuid }
+        montant: { type: number }
+        methode:
+          type: string
+          enum: [ESPECES, WAVE, ORANGE_MONEY, FREE_MONEY, VIREMENT, CHEQUE, CARTE]
+        telephone: { type: string }
+        notes: { type: string }
+
+    CreateFactureRequest:
+      type: object
+      required: [lignes]
+      properties:
+        clientId: { type: string, format: uuid }
+        type:
+          type: string
+          enum: [DEVIS, FACTURE, AVOIR, BON_COMMANDE]
+        dateEcheance: { type: string, format: date-time }
+        notes: { type: string }
+        conditionsPaiement: { type: string }
+        lignes:
+          type: array
+          items:
+            type: object
+            required: [designation, quantite, prixUnitaire]
+            properties:
+              produitId: { type: string, format: uuid }
+              designation: { type: string }
+              quantite: { type: number }
+              prixUnitaire: { type: number }
+              tva: { type: number }
+
+    UpdateEntrepriseRequest:
+      type: object
+      properties:
+        nom: { type: string }
+        telephone: { type: string }
+        email: { type: string, format: email }
+        adresse: { type: string }
+        ville: { type: string }
+        siret: { type: string }
+        langue:
+          type: string
+          enum: [fr, wo]
+
+    CreateCategorieRequest:
+      type: object
+      required: [nom]
+      properties:
+        nom: { type: string }
+        description: { type: string }
+
+    UpdateCategorieRequest:
+      type: object
+      properties:
+        nom: { type: string }
+        description: { type: string }
