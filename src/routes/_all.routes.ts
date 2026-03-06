@@ -6,6 +6,10 @@ import { PaiementController } from '../controllers/paiement.controller';
 import { EntrepriseController } from '../controllers/entreprise.controller';
 import { StockController } from '../controllers/stock.controller';
 import { DashboardController } from '../controllers/dashboard.controller';
+import { ExportController } from '../controllers/export.controller';
+import { RapportController } from '../controllers/rapport.controller';
+import { authorize } from '../middlewares/auth.middleware';
+import { Role } from '../entities/Utilisateur';
 
 // ─── FACTURES ────────────────────────────────────────────────
 export const factureRoutes = Router();
@@ -15,6 +19,20 @@ factureRoutes.get('/', FactureController.list);
 factureRoutes.get('/:id', FactureController.getById);
 factureRoutes.post('/', FactureController.create);
 factureRoutes.patch('/:id/statut', FactureController.changeStatut);
+
+// Nouvelles routes pour transformation et signature
+factureRoutes.post('/:id/transformer', FactureController.transformer);
+factureRoutes.post('/:id/signer', FactureController.signer);
+
+// ─── EXPORTS ─────────────────────────────────────────────────
+export const exportRoutes = Router();
+exportRoutes.use(authenticate, authorize(Role.GERANT, Role.COMPTABLE));
+
+exportRoutes.get('/factures', ExportController.exportFactures);
+exportRoutes.get('/clients', ExportController.exportClients);
+exportRoutes.get('/produits', ExportController.exportProduits);
+exportRoutes.get('/fournisseurs', ExportController.exportFournisseurs);
+exportRoutes.get('/grand-livre', ExportController.exportGrandLivre);
 
 // ─── CLIENTS ─────────────────────────────────────────────────
 export const clientRoutes = Router();
@@ -55,3 +73,14 @@ entrepriseRoutes.use(authenticate);
 
 entrepriseRoutes.get('/', EntrepriseController.getCurrent);
 entrepriseRoutes.put('/', EntrepriseController.updateCurrent);
+
+// ─── RAPPORTS ─────────────────────────────────────────────────
+export const rapportRoutes = Router();
+rapportRoutes.use(authenticate, authorize(Role.GERANT, Role.COMPTABLE));
+
+rapportRoutes.get('/ventes', RapportController.getVentesPeriode);
+rapportRoutes.get('/rentabilite', RapportController.getRentabilite);
+rapportRoutes.get('/creances', RapportController.getCreances);
+rapportRoutes.get('/charges', RapportController.getCharges);
+rapportRoutes.get('/ca-mensuel', RapportController.getCAMensuel);
+rapportRoutes.get('/rapprochement', RapportController.getRapprochement);

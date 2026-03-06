@@ -18,6 +18,7 @@ import produitRoutes from './routes/produit.routes';
 import {
   factureRoutes, clientRoutes, stockRoutes,
   dashboardRoutes, paiementRoutes, entrepriseRoutes,
+  exportRoutes, rapportRoutes,
 } from './routes/_all.routes';
 
 // Nouvelles routes
@@ -100,6 +101,8 @@ app.use(`${API}/pdf`, pdfRoutes);
 app.use(`${API}/upload`, uploadRoutes);
 app.use(`${API}/notif`, notifRoutes);
 app.use(`${API}/webhooks`, webhookRoutes);
+app.use(`${API}/exports`, exportRoutes);
+app.use(`${API}/rapports`, rapportRoutes);
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/health', (_req: Request, res: Response) => {

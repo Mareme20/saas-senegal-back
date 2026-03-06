@@ -77,6 +77,20 @@ export class Facture {
   @Column({ nullable: true })
   conditionsPaiement?: string;
 
+  // Signature électronique
+  @Column({ nullable: true, type: 'text' })
+  signature?: string;  // Signature en base64
+
+  @Column({ nullable: true })
+  dateSignature?: Date;
+
+  @Column({ default: false })
+  signe!: boolean;
+
+  // Référence à la facture d'origine (pour transformations)
+  @Column({ nullable: true })
+  factureOriginaleId?: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

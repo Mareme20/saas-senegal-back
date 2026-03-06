@@ -38,4 +38,18 @@ export interface IFactureRepository {
     lignesCalc: Array<LigneInput & { tva: number; montantHT: number; montantTTC: number; ordre: number }>,
   ): Promise<Facture | null>;
   changeStatut(id: string, entrepriseId: string, statut: StatutFacture): Promise<Facture | null>;
+  
+  // Transformation de documents
+  transformer(
+    entrepriseId: string,
+    userId: string,
+    originalId: string,
+    nouveauType: TypeFacture,
+  ): Promise<Facture | null>;
+  
+  // Signature électronique
+  signer(id: string, entrepriseId: string, signature: string): Promise<Facture | null>;
+  
+  // Trouver par ID simple
+  findById(id: string): Promise<Facture | null>;
 }

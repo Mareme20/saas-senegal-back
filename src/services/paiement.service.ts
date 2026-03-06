@@ -1,6 +1,7 @@
 import { CreatePaiementDto, ListPaiementsQueryDto } from '../dtos/paiement.dto';
 import { TypeOrmPaiementRepository } from '../repositories/implementations';
 import { IPaiementRepository } from '../repositories/interfaces';
+import { comptabiliteService } from './comptabilite.service';
 
 export class PaiementService {
   constructor(private readonly paiementRepository: IPaiementRepository) {}
@@ -12,8 +13,10 @@ export class PaiementService {
     return this.paiementRepository.findAll({ entrepriseId, page, limit });
   }
 
-  create(entrepriseId: string, payload: CreatePaiementDto) {
-    return this.paiementRepository.createConfirmedAndSyncFacture(entrepriseId, payload);
+  async create(entrepriseId: string, payload: CreatePaiementDto) {
+    const paiement = await this.paiementRepository.createConfirmedAndSyncFacture(entrepriseId, payload);
+    await comptabiliteService.comptabiliserPaiement(paiement);
+    return paiement;
   }
 }
 

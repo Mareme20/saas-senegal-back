@@ -124,4 +124,88 @@ export class TypeOrmFactureRepository implements IFactureRepository {
     await this.repo.update({ id, entrepriseId }, { statut });
     return this.repo.findOneBy({ id, entrepriseId });
   }
+
+  async findById(id: string): Promise<Facture | null> {
+    return this.repo.findOne({
+      where: { id },
+      relations: ['lignes', 'client', 'paiements'],
+    });
+  }
+
+  async transformer(
+    entrepriseId: string,
+    userId: string,
+    originalId: string,
+    nouveauType: TypeFacture,
+  ): Promise<Facture | null> {
+    const originale = await this.repo.findOne({
+      where: { id: originalId, entrepriseId },
+      relations: ['lignes'],
+    });
+
+    if (!originale) return null;
+
+    // Générer le nouveau numéro
+    const nouveauNumero = await this.getNextNumero(entrepriseId, nouveauType);
+
+    // Créer la nouvelle facture
+    const nouvelle = await AppDataSource.transaction(async (manager) => {
+      const facture = manager.create(Facture, {
+        entrepriseId,
+        creePar: userId,
+        clientId: originale.clientId,
+        type: nouveauType,
+        numero: nouveauNumero,
+        statut: StatutFacture.BROUILLON,
+        dateEcheance: originale.dateEcheance,
+        notes: originale.notes,
+        conditionsPaiement: originale.conditionsPaiement,
+        sousTotal: originale.sousTotal,
+        montantTva: originale.montantTva,
+        montantTotal: originale.montantTotal,
+        factureOriginaleId: originalId,
+      });
+      await manager.save(facture);
+
+      // Copier les lignes
+      for (const ligne of originale.lignes) {
+        const nouvelleLigne = manager.create(LigneFacture, {
+          factureId: facture.id,
+          produitId: ligne.produitId,
+          designation: ligne.designation,
+          quantite: ligne.quantite,
+          prixUnitaire: ligne.prixUnitaire,
+          tva: ligne.tva,
+          montantHT: ligne.montantHT,
+          montantTTC: ligne.montantTTC,
+          ordre: ligne.ordre,
+        });
+        await manager.save(nouvelleLigne);
+      }
+
+      // Marquer l'originale comme transformée
+      await manager.update(Facture, originalId, { 
+        statut: nouveauType === TypeFacture.FACTURE ? StatutFacture.ENVOYEE : originale.statut 
+      });
+
+      return manager.findOne(Facture, {
+        where: { id: facture.id },
+        relations: ['lignes', 'client'],
+      });
+    });
+
+    return nouvelle;
+  }
+
+  async signer(id: string, entrepriseId: string, signature: string): Promise<Facture | null> {
+    await this.repo.update(
+      { id, entrepriseId },
+      { 
+        signature,
+        dateSignature: new Date(),
+        signe: true,
+      }
+    );
+    return this.repo.findOneBy({ id, entrepriseId });
+  }
 }
